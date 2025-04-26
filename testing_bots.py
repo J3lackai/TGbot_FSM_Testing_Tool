@@ -14,9 +14,6 @@ def decrypt_data(encrypted_data, key):
     decrypted_data = f.decrypt(encrypted_data).decode()
     return decrypted_data
 
-def generate_key():
-    return Fernet.generate_key().decode()  # Fernet.generate_key возвращает bytes
-
 def testing_bots() ->tuple[list[bool], tuple[str], str]:
     # Загружаем переменные из файла .env
     dotenv_path = Path('.') / '.env'
@@ -26,7 +23,7 @@ def testing_bots() ->tuple[list[bool], tuple[str], str]:
     api_id, api_hash, phone, encryption_key, encrypted_session = get_data_from_env()
 
     # Достаём данные из конфига
-    wait, lvl_log, tuple_tests, list_res, tuple_bots = get_data_from_conf()
+    wait, lvl_log, tuple_tests, list_res, tuple_bots,  test_flag, dc = get_data_from_conf()
     
     logger.add(os.path.join("result.log"),
                format="|{time:YYYY.MM.DD HH:mm}|{level}|{message}|", level=lvl_log, watch=True, rotation="300 kb")
@@ -52,15 +49,17 @@ def testing_bots() ->tuple[list[bool], tuple[str], str]:
     async def run_test(phone, encryption_key) -> list[bool] | None:
         # Проверяем наличие ключа шифрования. Если нет, то создаем и сохраняем.
         try:
-            # дешифруем session_str ДО создания TelegramClient
             session = StringSession()
             if encrypted_session:
                 session_str = decrypt_data(
                     encrypted_session.encode(), encryption_key)
                 session = StringSession(session_str)
-
-            client = TelegramClient(session, int(api_id), api_hash)
-
+            if test_flag:
+                client = TelegramClient(session, api_id, api_hash)
+                client.session.set_dc(dc, '149.154.167.40', 80)
+            else:
+                client = TelegramClient(session, api_id, api_hash)
+            
             await client.start(phone=phone)  # Запуск процесса авторизации
             # Проверка доступности бота
             if not encrypted_session and session.auth_key: # Если сессии не было и мы авторизовались

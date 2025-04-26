@@ -1,13 +1,13 @@
 import configparser as conf
 import os
 from loguru import logger
-from testing_bots import generate_key
+from cryptography.fernet import Fernet
 
 def get_data_from_env() -> tuple[int, str, str, str, str | None]:
-
+    sample = "https://github.com/J3lackai/TGbot_FSM_Testing_Tool/blob/main/.env.example"
     if not os.path.exists(".env"):
-        logger.critical(f"Ошибка: Не найден файл '.env', создайте его\
-                         и добавьте него ваши данные! Иначе скрипт не будет работать!")
+        logger.critical(f"Ошибка: Не найден файл '.env', создайте его и добавьте него ваши данные! \
+                        Иначе скрипт не будет работать! Шаблон для заполнения: {sample}")
         raise
     api_id_str = os.getenv("TELEGRAM_API_ID")
     api_hash = os.getenv("TELEGRAM_API_HASH")
@@ -16,7 +16,8 @@ def get_data_from_env() -> tuple[int, str, str, str, str | None]:
     encrypted_session = os.getenv('ENCRYPTED_SESSION')
     if not all([api_id_str, api_hash, phone]):
         logger.critical(
-            "Ошибка: Не найдены TELEGRAM_API_ID, TELEGRAM_API_HASH или PHONE в .env или переменных окружения.")
+            f"Ошибка: Не найдены TELEGRAM_API_ID, TELEGRAM_API_HASH или PHONE в '.env' или переменных окружения.\
+            Шаблон для '.env': {sample}")
         raise
 
     if encrypted_session and not encryption_key:
@@ -28,7 +29,7 @@ def get_data_from_env() -> tuple[int, str, str, str, str | None]:
     elif not encryption_key:
         logger.warning(
             "Ключ шифрования ENCRYPTION_KEY не найден в системных переменных окружения.")
-        encryption_key = generate_key()
+        encryption_key = Fernet.generate_key().decode()
         logger.warning(f"Сгенерирован НОВЫЙ ключ шифрования")
         logger.warning("ВНИМАНИЕ: Этот ключ действителен только для текущего запуска. \
                        Чтобы использовать зашифрованную сессию в будущем, установите этот ключ \
@@ -48,30 +49,33 @@ def get_data_from_env() -> tuple[int, str, str, str, str | None]:
     return api_id, api_hash, phone, encryption_key, encrypted_session
 
 
-def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bool], tuple[str]]:
-
+def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bool], tuple[str], bool, int]:
+    sample = "https://github.com/J3lackai/TGbot_FSM_Testing_Tool/blob/main/config.ini"
     def ensure_right_config(path="config.ini") -> conf.ConfigParser:
 
         config = conf.ConfigParser()
         # Проверяем есть ли конфиг в директории скрипта
-        if not os.path.exists("config.ini", encoding='utf-8'):
+        if not os.path.exists("config.ini"):
             logger.critical(f"Ошибка: Не найден файл 'config.ini', создайте его\
-                         и добавьте него ваши данные! Иначе скрипт не будет работать!")
+                         и добавьте него ваши данные! Иначе скрипт не будет работать!\
+                        Шаблон для файла-конфига, можно найти тут: {sample}")
             raise
         try:
-            config.read(path)
+            config.read(path, encoding='utf-8')
         except conf.Error as e:
             logger.critical(f"Ошибка при чтении файла конфигурации: {e}.")
             # Даже если произошла ошибка при чтении, все равно перезаписываем файл
-            return
+            raise
 
         # Проверяем что есть нужные секции
         if not config.has_section('Main') or not config.has_section('Telegram'):
             logger.critical(
-                "Отсутствует секция 'Main' или 'Telegram' в файле 'config.ini'.")
+                f"Отсутствует секция 'Main' или 'Telegram' в файле 'config.ini'.  \
+                Шаблон для файла-конфига, можно найти тут: {sample}")
             raise
         else:
             logger.debug("Нашли секции 'Main' и 'Telegram' в файле-конфиге...")
+            return config
 
     config = ensure_right_config(path=path)
     main_conf = config['Main']
@@ -81,10 +85,24 @@ def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bo
     wait_str = main_conf["wait_time"]
     if not wait_str.isdigit() or not 0 <= int(wait_str) <= 60:
         logger.warning(
-            "Ошибка: Неправильно указан wait_time в конфиге, использовано дефолтное значение 10 секунд")
+            "Ошибка: Неправильно указан wait_time в конфиге, использовано дефолтное значение 10 секунд.")
         wait = 10
     else:
         wait = int(wait_str)
+
+    if main_conf["test_flag"].upper() not in ("FALSE", "TRUE"):
+        logger.critical("Ошибка: test_flag в конфиге должен быть равен false, либо true")
+        raise
+    dc = None
+    if main_conf["test_flag"].upper() == 'TRUE':
+        test_flag = True
+        dc = main_conf["dc"]
+        if not dc.isdigit():
+            logger.critical("Ошибка: dc в конфиге должен быть числом указывающим номер тестового сервера телеграм")
+            raise
+        dc = int(dc)
+    else:
+        test_flag = True
     # Преобразуем строковый уровень логирования в числовой
     lvl_log = main_conf["level_logging"].upper()
     # Проверяем допустимость уровня логирования
@@ -122,6 +140,6 @@ def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bo
 
     if not list_bots:
         logger.critical(
-            "Ошибка конфига: bots должен содержать имя хотя бы одного бота. @name_bot[1], @name_bot[2], ..., @name_bot[n] // [i] не нужно писать")
+            "Ошибка: bots должен содержать имя хотя бы одного бота. @name_bot[1], @name_bot[2], ..., @name_bot[n] // [i] не нужно писать")
         raise
-    return wait, lvl_log, tuple(list_tests), list_res, tuple(list_bots)
+    return wait, lvl_log, tuple(list_tests), list_res, tuple(list_bots), test_flag, dc
