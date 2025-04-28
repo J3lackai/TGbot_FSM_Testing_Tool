@@ -46,9 +46,8 @@ async def communicating_with_bot(client, bot_entity: telethon.types.User, file_f
     try:
         file = open(file_for_testing, 'r')
         line = file.readline()
-        logger.debug(f"Прочитали строку {line}")
-
         while line != '':
+            
             if line == '\n':
                 line = file.readline()
                 continue
@@ -62,8 +61,8 @@ async def communicating_with_bot(client, bot_entity: telethon.types.User, file_f
             expected_answer = command_expected_answer[1] if len(
                 command_expected_answer) > 1 else None
 
-            logger.debug(
-                f"Отправляем команду через API: {command}, Ожидаем ответ: {expected_answer}")
+            logger.info(
+                f"Отправляем боту команду: {command}, Ожидаем ответ: {expected_answer}")
 
             # Отправляем команду боту через Telethon API
             await client.send_message(bot_entity, command)
@@ -96,12 +95,11 @@ async def communicating_with_bot(client, bot_entity: telethon.types.User, file_f
                 file.close()
                 return -1  # Ошибка: нет ответа
 
-            logger.debug(f"Получен ответ от бота через API: {answer_message}")
-
+            logger.info(f"Ответ от бота: {answer_message}")
             if expected_answer is not None and answer_message != expected_answer:
                 logger.warning(
-                    f"Ошибка в реализации автомата: Когда тестировали с помощью {file_for_testing}:\
-                      Ожидали '{expected_answer}', получили '{answer_message}'")
+                    f"Ошибка в реализации автомата: Когда тестировали с помощью {file_for_testing}:"
+                    f"Ожидали '{expected_answer}', получили '{answer_message}'")
                 file.close()
                 return 0
             line = file.readline()

@@ -23,11 +23,11 @@ def print_results_in_table(list_res, tuple_tests, bot_username_tg):
     col2_width = len(result_testing_header) + 2
 
     # '<' - выравнивание по левому краю, '>' - по правому, '^' - по ширине
-    logger.success("-" * (col1_width + col2_width)) # Разделитель строк
+    
     message_table = f"{name_method_header:<{col1_width}}| {result_testing_header:<{col2_width}}"
 
     logger.success(f"Выполнено тестирование для бота: {bot_username_tg}")
-    logger.success("")
+    logger.success("-" * (col1_width + col2_width)) # Разделитель строк
     logger.success(message_table)
 
     for i in range(len(tuple_tests)):
@@ -43,14 +43,13 @@ def main():
         list_res, tuple_tests, bot_username_tg = testing_bots()
         if None in (list_res, tuple_tests, bot_username_tg):
             logger.error("Тестирование завершено с ошибками.")
-            beautiful_exit()
         else:
             print_results_in_table(
-                list_res=list_res, tuple_tests=tuple_tests, bot_username_tg=bot_username_tg)
-    except Exception as e:
-        print(e)
+                list_res=list_res, tuple_tests=tuple_tests, bot_username_tg=bot_username_tg)      
+    except:
+        pass
+    finally:   
         beautiful_exit()
-
 
 if __name__ == "__main__":
     main()

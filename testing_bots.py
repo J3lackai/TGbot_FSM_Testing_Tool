@@ -1,6 +1,7 @@
 import os
 from loguru import logger
 import asyncio
+import sys
 from telethon import TelegramClient
 from pathlib import Path
 from telethon.sessions import StringSession
@@ -24,9 +25,10 @@ def testing_bots() ->tuple[list[bool], tuple[str], str]:
 
     # Достаём данные из конфига
     wait, lvl_log, tuple_tests, list_res, tuple_bots,  test_flag, dc = get_data_from_conf()
-    
+    logger.remove()
+    logger.add(sys.stderr, format = "|<green> {time: HH:mm:ss} </green>| <level> {level} </level> | {message}", level = lvl_log)
     logger.add(os.path.join("result.log"),
-               format="|{time:YYYY.MM.DD HH:mm}|{level}|{message}|", level=lvl_log, watch=True, rotation="300 kb")
+               format="|{time:YYYY.MM.DD HH:mm}|{level}|{message}|", level="DEBUG", rotation="500 kb")
 
     logger.info("Список ботов:")
     for i in range(1, len(tuple_bots) + 1):
@@ -34,12 +36,8 @@ def testing_bots() ->tuple[list[bool], tuple[str], str]:
 
     count = int(
         input('Введите: номер бота которого нужно тестировать. (Начиная от единицы): '))
-    if count <= 0:
-        logger.critical("Ошибка: номер должен быть больше или равен 1.")
-        raise
-
-    if count > len(tuple_bots):
-        logger.critical("Ошибка: бота с таким номером нет в конфиге.")
+    if not (0 <= count <= len(tuple_bots)):
+        logger.critical("Ошибка: Неправильный номер бота.")
         raise
 
     bot_username_tg = tuple_bots[count - 1]

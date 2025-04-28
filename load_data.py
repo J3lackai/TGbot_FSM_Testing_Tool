@@ -6,8 +6,8 @@ from cryptography.fernet import Fernet
 def get_data_from_env() -> tuple[int, str, str, str, str | None]:
     sample = "https://github.com/J3lackai/TGbot_FSM_Testing_Tool/blob/main/.env.example"
     if not os.path.exists(".env"):
-        logger.critical(f"Ошибка: Не найден файл '.env', создайте его и добавьте него ваши данные! \
-                        Иначе скрипт не будет работать! Шаблон для заполнения: {sample}")
+        logger.critical(f"Ошибка: Не найден файл '.env', создайте его и добавьте него ваши данные!\n"+
+                        f"Иначе скрипт не будет работать! Шаблон для заполнения:\n {sample}")
         raise
     api_id_str = os.getenv("TELEGRAM_API_ID")
     api_hash = os.getenv("TELEGRAM_API_HASH")
@@ -16,8 +16,8 @@ def get_data_from_env() -> tuple[int, str, str, str, str | None]:
     encrypted_session = os.getenv('ENCRYPTED_SESSION')
     if not all([api_id_str, api_hash, phone]):
         logger.critical(
-            f"Ошибка: Не найдены TELEGRAM_API_ID, TELEGRAM_API_HASH или PHONE в '.env' или переменных окружения.\
-            Шаблон для '.env': {sample}")
+            f"Ошибка: Не найдены TELEGRAM_API_ID, TELEGRAM_API_HASH или PHONE в '.env' или переменных окружения.\n"+
+            f"Шаблон для '.env': {sample}")
         raise
 
     if encrypted_session and not encryption_key:
@@ -46,6 +46,10 @@ def get_data_from_env() -> tuple[int, str, str, str, str | None]:
         raise
     else:
         api_id = int(api_id_str)
+    if not phone or not phone[int(phone.startswith('+')):].isdigit():
+            logger.critical(
+            f"Ошибка: TELEGRAM_API_ID должен быть числом.")
+            raise
     return api_id, api_hash, phone, encryption_key, encrypted_session
 
 
@@ -56,27 +60,16 @@ def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bo
         config = conf.ConfigParser()
         # Проверяем есть ли конфиг в директории скрипта
         if not os.path.exists("config.ini"):
-            logger.critical(f"Ошибка: Не найден файл 'config.ini', создайте его\
-                         и добавьте него ваши данные! Иначе скрипт не будет работать!\
-                        Шаблон для файла-конфига, можно найти тут: {sample}")
+            logger.critical(f"Ошибка: Не найден файл 'config.ini', создайте его и добавьте него ваши данные! "
+                            +f"Иначе скрипт не будет работать! Шаблон для файла-конфига, можно найти тут:\n{sample}")
             raise
         try:
             config.read(path, encoding='utf-8')
         except conf.Error as e:
-            logger.critical(f"Ошибка при чтении файла конфигурации: {e}.")
-            # Даже если произошла ошибка при чтении, все равно перезаписываем файл
-            raise
-
-        # Проверяем что есть нужные секции
-        if not config.has_section('Main') or not config.has_section('Telegram'):
-            logger.critical(
-                f"Отсутствует секция 'Main' или 'Telegram' в файле 'config.ini'.  \
-                Шаблон для файла-конфига, можно найти тут: {sample}")
-            raise
-        else:
-            logger.debug("Нашли секции 'Main' и 'Telegram' в файле-конфиге...")
-            return config
-
+            logger.critical(f"Ошибка при чтении файла конфигурации 'config.ini': {e}."+
+                            f" Заполните 'config.ini' по шаблону: \n{sample}")
+            raise 
+        return config
     config = ensure_right_config(path=path)
     main_conf = config['Main']
     tg_conf = config['Telegram']
@@ -119,8 +112,8 @@ def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bo
     for test in list_tests:
         if not test.lower().endswith(".txt"):
             logger.critical(
-                "Ошибка: Неправильные названия файлов для тестирования, должно быть в формате:\
-                      namefile[1], namefile[2], ..., namefile[n] // [i] не нужно писать")
+                "Ошибка: Неправильные названия файлов для тестирования, должно быть в формате:\n" +
+                      "namefile[1], namefile[2], ..., namefile[n] // [i] не нужно писать")
             raise
         if not os.path.exists(test):
             logger.critical(
@@ -134,8 +127,8 @@ def get_data_from_conf(path="config.ini") -> tuple[int, str, tuple[str], list[bo
     for bot in list_bots:
         if not bot.startswith("@"):
             logger.critical(
-                "Ошибка: Неправильные названия ботов для тестирования, должно быть в формате:\
-                      @name_bot[1], @name_bot[2], ..., @name_bot[n] // [i] не нужно писать")
+                "Ошибка: Неправильные названия ботов для тестирования, должно быть в формате:\n" +
+                      "@name_bot[1], @name_bot[2], ..., @name_bot[n] // [i] не нужно писать")
             raise
 
     if not list_bots:
