@@ -5,7 +5,7 @@ venv/
 bots/
 output/
 old_ver/
-for_git*/
+for_git_version_code/
 .py
 config.ini
 *.log
