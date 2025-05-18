@@ -1,9 +1,10 @@
 from cryptography.fernet import Fernet
 from keyboard import wait
+import sys
 def beautiful_exit():
     print("Нажмите 'Enter' для завершения программы.")
     wait("enter")
-    exit()
+    sys.exit()
 print("Ваш ключ:", end = "")
 print(Fernet.generate_key().decode())
 print("ВНИМАНИЕ: Не кому ни передавайте этот ключ! Если вы использовали ключ, тогда человек получивший доступ к ключу может украсть ваш Telegram аккаунт!")
