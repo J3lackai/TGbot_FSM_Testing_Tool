@@ -4,7 +4,8 @@
 Взаимодействие с ботами осуществляется напрямую через библиотеку **Telethon**, используя Telegram API.
 
 ## Начало работы
-![image](https://github.com/user-attachments/assets/7fe8885a-9f1e-4c05-9495-2751249b5116)
+![image](https://github.com/user-attachments/assets/9f593149-f641-4361-98b9-ce1298fc9070)
+
 
 ## Результат работы
 ![image](https://github.com/user-attachments/assets/eb2abb9b-31fe-4e71-9868-a60d2cd64e47)
