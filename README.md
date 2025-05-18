@@ -3,7 +3,12 @@
 
 Взаимодействие с ботами осуществляется напрямую через библиотеку **Telethon**, используя Telegram API.
 
+## Начало работы
+![image](https://github.com/user-attachments/assets/7fe8885a-9f1e-4c05-9495-2751249b5116)
+
+## Результат работы
 ![image](https://github.com/user-attachments/assets/eb2abb9b-31fe-4e71-9868-a60d2cd64e47)
+
 
 ## Необходимые условия
 
