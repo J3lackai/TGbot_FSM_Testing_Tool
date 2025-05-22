@@ -7,11 +7,11 @@
 Взаимодействие с ботами осуществляется напрямую через библиотеку **Telethon**, используя Telegram API.
 
 ## Запуск программы
-![image](https://github.com/user-attachments/assets/9f593149-f641-4361-98b9-ce1298fc9070)
+![image](/assets/run_program.png)
 
 
 ## Результат работы программы
-![image](https://github.com/user-attachments/assets/eb2abb9b-31fe-4e71-9868-a60d2cd64e47)
+![image](/assets/result_work.png)
 
 
 ## Необходимые условия
@@ -36,7 +36,7 @@
     *   **Запустите файл key_generator:** Он сгенерирует вам ключ, который нужно будет добавить как переменную окружения.
     *   **Как установить пользовательскую переменную окружения: для ОС windows (Подойдёт для любой 7, 8, 8.1, 10, 11):**
        
-        ![image](https://github.com/user-attachments/assets/b8c086b7-9ffe-431f-b123-6bcb369f27ce)
+        ![image](/assets/guide_for_establishing_key.png)
         
     *  **Если у вас другая операционная система:** Поищите в интернете способ для вашей операционной системы.
 
